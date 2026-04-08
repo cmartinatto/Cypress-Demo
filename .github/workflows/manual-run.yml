@@ -1,0 +1,144 @@
+name: Manual Run
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: true
+        default: qa
+        type: choice
+        options: [dev, qa, prod]
+      branch:
+        description: "Branch to test (leave empty for current)"
+        required: false
+        default: ""
+        type: string
+      suite:
+        description: "Suite name (e.g. smoke, api, ui, regression)"
+        required: false
+        default: ""
+        type: string
+      tag:
+        description: "Tag filter (e.g. @smoke, TC-UI-005)"
+        required: false
+        default: ""
+        type: string
+      keyword:
+        description: "Test title keyword — partial match (e.g. login)"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  cypress-tests:
+    name: Manual — ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch || github.ref }}
+
+      - name: Build test command
+        id: build-cmd
+        run: |
+          CMD="npm test -- --env ${{ inputs.environment }}"
+          if [ -n "${{ inputs.suite }}" ];   then CMD="$CMD --suite ${{ inputs.suite }}";     fi
+          if [ -n "${{ inputs.tag }}" ];     then CMD="$CMD --tag ${{ inputs.tag }}";          fi
+          if [ -n "${{ inputs.keyword }}" ]; then CMD="$CMD --keyword ${{ inputs.keyword }}"; fi
+          echo "cmd=$CMD" >> $GITHUB_OUTPUT
+          echo "Running: $CMD"
+
+      - name: Run Cypress tests
+        uses: cypress-io/github-action@v6
+        with:
+          command: ${{ steps.build-cmd.outputs.cmd }}
+        env:
+          CYPRESS_VALID_USER_EMAIL: ${{ secrets.VALID_USER_EMAIL }}
+          CYPRESS_VALID_USER_PASSWORD: ${{ secrets.VALID_USER_PASSWORD }}
+          CYPRESS_VALID_USER_NAME: ${{ secrets.VALID_USER_NAME }}
+
+      - name: Make screenshot paths relative
+        if: always()
+        run: |
+          [ -d cypress/reports/mocha ] && find cypress/reports/mocha -name "*.json" -exec sed -i "s|$(pwd)/||g" {} \; || true
+
+      - name: Upload mocha results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mocha-results-manual
+          path: cypress/reports/mocha/
+          retention-days: 7
+
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screenshots-manual
+          path: cypress/screenshots/
+          retention-days: 7
+
+  deploy-report:
+    name: Deploy Report → /manual/
+    runs-on: ubuntu-latest
+    needs: cypress-tests
+    if: always()
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download mocha results
+        uses: actions/download-artifact@v4
+        with:
+          name: mocha-results-manual
+          path: cypress/reports/mocha/
+
+      - name: Download screenshots
+        uses: actions/download-artifact@v4
+        with:
+          name: screenshots-manual
+          path: cypress/screenshots/
+
+      - name: Generate HTML report
+        run: |
+          npx mochawesome-merge "cypress/reports/mocha/*.json" -o cypress/reports/mochawesome.json
+          npx tsx scripts/process-report.ts
+          npx marge cypress/reports/mochawesome.json -f index -o cypress/reports/html --inline
+
+      - name: Inject run metadata
+        env:
+          META_WORKFLOW: ${{ github.workflow }}
+          META_ENV: ${{ inputs.environment }}
+          META_BRANCH: ${{ inputs.branch || github.ref_name }}
+          META_ACTOR: ${{ github.actor }}
+          META_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: npx tsx scripts/inject-metadata.ts
+
+      - name: Deploy to GitHub Pages (/manual/)
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: cypress/reports/html
+          target-folder: manual
+          clean: true

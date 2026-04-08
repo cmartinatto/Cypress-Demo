@@ -1,0 +1,37 @@
+{
+  "suites": {
+    "smoke": {
+      "description": "Critical tests validating the most important flows in the system",
+      "specs": [
+        {
+          "file": "cypress/e2e/api/login.cy.ts",
+          "tests": [
+            "should return 200 and responseCode 200 with correct credentials",
+            "should return responseCode 404 with wrong password"
+          ]
+        }
+      ]
+    },
+    "api": {
+      "description": "All API endpoint tests",
+      "specs": ["cypress/e2e/api/**/*.cy.ts"]
+    },
+    "ui": {
+      "description": "All UI tests",
+      "specs": ["cypress/e2e/ui/**/*.cy.ts"]
+    },
+    "regression": {
+      "description": "Full regression suite — all tests",
+      "specs": ["cypress/e2e/**/*.cy.ts"]
+    },
+    "dev": {
+      "description": "Minimal tests for framework development",
+      "specs": [
+        {
+          "file": "cypress/e2e/ui/orders.cy.ts",
+          "tests": ["should remove a product from the cart"]
+        }
+      ]
+    }
+  }
+}
