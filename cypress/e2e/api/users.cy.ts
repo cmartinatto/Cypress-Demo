@@ -297,7 +297,7 @@ describe("API - Users", () => {
 
     it(
       "should return responseCode 405 when using GET instead of DELETE",
-      { tags: ["TC-API-024"] },
+      { tags: ["TC-API-124"] },
       () => {
         cy.request({
           method: "GET",
