@@ -89,7 +89,7 @@ describe("Orders", () => {
     beforeEach(() => {
       homePageActionManager.navigate();
     });
-    it("should add a product to the cart", { tags: ["TC-UI-999", "@smoke", "@debugging"] }, () => {
+    it("should add a product to the cart", { tags: ["TC-UI-007", "@smoke", "@debugging"] }, () => {
       // Test
       productsActionManager.addProductToCart(0);
       productsActionManager.goToCart();
@@ -98,7 +98,7 @@ describe("Orders", () => {
       cartAssertionManager.verifyProductCount(1);
     });
 
-    it("should add multiple products to the cart", () => {
+    it("should add multiple products to the cart", { tags: ["TC-UI-008"] }, () => {
       // Test
       productsActionManager.addProductToCart(0);
       productsActionManager.continueShopping();
@@ -110,7 +110,7 @@ describe("Orders", () => {
       cartAssertionManager.verifyProductCount(2);
     });
 
-    it("should remove a product from the cart", () => {
+    it("should remove a product from the cart", { tags: ["TC-UI-009"] }, () => {
       // Test
       productsActionManager.addProductToCart(0);
       productsActionManager.goToCart();
