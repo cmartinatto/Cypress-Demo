@@ -119,7 +119,7 @@ jobs:
         run: |
           if ls cypress/reports/mocha/*.json 2>/dev/null | grep -q .; then
             npx mochawesome-merge "cypress/reports/mocha/*.json" -o cypress/reports/mochawesome.json
-            HAS_RESULTS=$(node -e "const r=require('./cypress/reports/mochawesome.json'); console.log(r.results && r.results.length > 0 ? 'yes' : 'no')")
+            HAS_RESULTS=$(node -e "try { const r=require('./cypress/reports/mochawesome.json'); const ok=Array.isArray(r.results) && r.results.length > 0 && r.results[0] != null; console.log(ok ? 'yes' : 'no'); } catch(e) { console.log('no'); }")
             if [ "$HAS_RESULTS" = "yes" ]; then
               npx tsx scripts/process-report.ts
               npx marge cypress/reports/mochawesome.json -f index -o cypress/reports/html --inline
