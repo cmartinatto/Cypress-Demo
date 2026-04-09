@@ -2,7 +2,7 @@ import { defineConfig } from "cypress";
 import * as fs from "fs";
 import * as path from "path";
 import cypressMochawesomePlugin from "cypress-mochawesome-reporter/plugin";
-import grepPlugin from "@cypress/grep/plugin";
+import * as grepPlugin from "@cypress/grep/plugin";
 
 type EnvName = "dev" | "qa" | "prod";
 
