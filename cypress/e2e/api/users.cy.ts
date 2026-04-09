@@ -307,7 +307,6 @@ describe("API - Users", () => {
           const responseBody =
             typeof response.body === "string" ? JSON.parse(response.body) : response.body;
           expect(response.status).to.eq(405);
-          //expect(responseBody.responseCode).to.eq(405);
           expect(responseBody.detail).to.eq('Method "GET" not allowed.');
         });
       },
