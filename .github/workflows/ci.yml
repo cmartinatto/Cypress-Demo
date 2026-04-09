@@ -117,9 +117,15 @@ jobs:
 
       - name: Generate HTML report
         run: |
-          npx mochawesome-merge "cypress/reports/mocha/*.json" -o cypress/reports/mochawesome.json
-          npx tsx scripts/process-report.ts
-          npx marge cypress/reports/mochawesome.json -f index -o cypress/reports/html --inline
+          if ls cypress/reports/mocha/*.json 2>/dev/null | grep -q .; then
+            npx mochawesome-merge "cypress/reports/mocha/*.json" -o cypress/reports/mochawesome.json
+            npx tsx scripts/process-report.ts
+            npx marge cypress/reports/mochawesome.json -f index -o cypress/reports/html --inline
+          else
+            echo "No test reports found, skipping report generation"
+            mkdir -p cypress/reports/html
+            echo "<html><body><h1>No test results available</h1></body></html>" > cypress/reports/html/index.html
+          fi
 
       - name: Inject run metadata
         env:
