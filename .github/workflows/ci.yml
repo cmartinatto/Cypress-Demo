@@ -108,6 +108,14 @@ jobs:
           name: mocha-results-ci
           path: cypress/reports/mocha/
 
+      - name: Debug mocha reports
+        if: always()
+        run: |
+          echo "=== Files in cypress/reports/mocha/ ==="
+          ls -la cypress/reports/mocha/ 2>/dev/null || echo "(directory empty or missing)"
+          echo "=== First JSON file content (if any) ==="
+          find cypress/reports/mocha -name "*.json" | head -1 | xargs -I{} sh -c 'echo "File: {}"; cat {}' 2>/dev/null || echo "(no json files)"
+
       - name: Download screenshots
         uses: actions/download-artifact@v4
         continue-on-error: true
