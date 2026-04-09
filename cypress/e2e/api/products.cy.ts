@@ -176,7 +176,7 @@ describe("API - Products", () => {
 
     it(
       "should return a body with responseCode and products properties",
-      { tags: ["TC-API-036"] },
+      { tags: ["TC-API-037"] },
       () => {
         cy.request({
           method: "POST",
