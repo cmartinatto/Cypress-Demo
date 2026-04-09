@@ -1,6 +1,8 @@
 import { defineConfig } from "cypress";
 import * as fs from "fs";
 import * as path from "path";
+import cypressMochawesomePlugin from "cypress-mochawesome-reporter/plugin";
+import grepPlugin from "@cypress/grep/plugin";
 
 type EnvName = "dev" | "qa" | "prod";
 
@@ -23,14 +25,15 @@ export default defineConfig({
     configFile: "reporter-config.json",
   },
   e2e: {
-    setupNodeEvents(_on, config) {
+    setupNodeEvents(on, config) {
       const envName = (config.env.ENV as string) ?? "dev";
       const envConfig = loadEnvConfig(envName);
 
       config.baseUrl = envConfig.baseUrl;
       config.env["API_URL"] = envConfig.apiUrl;
 
-      require("@cypress/grep/plugin").plugin(config);
+      cypressMochawesomePlugin(on);
+      grepPlugin.plugin(config);
       return config;
     },
   },
