@@ -1,3 +1,8 @@
+declare module "cypress-mochawesome-reporter/plugin" {
+  function plugin(on: Cypress.PluginEvents): void;
+  export = plugin;
+}
+
 declare namespace Cypress {
   interface TypeOptions {
     sensitive: boolean;
