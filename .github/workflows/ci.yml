@@ -1,0 +1,152 @@
+name: CI — Smoke QA
+
+on:
+  pull_request:
+    branches: [master, develop]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  quality-checks:
+    name: Lint & Format
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint check
+        run: npm run lint:check
+
+      - name: Format check
+        run: npm run format:check
+
+  cypress-tests:
+    name: Smoke — QA
+    runs-on: ubuntu-latest
+    needs: quality-checks
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Cypress smoke tests
+        uses: cypress-io/github-action@v6
+        with:
+          command: npm test -- --suite smoke --env qa
+        env:
+          CYPRESS_VALID_USER_EMAIL: ${{ secrets.VALID_USER_EMAIL }}
+          CYPRESS_VALID_USER_PASSWORD: ${{ secrets.VALID_USER_PASSWORD }}
+          CYPRESS_VALID_USER_NAME: ${{ secrets.VALID_USER_NAME }}
+
+      - name: Make screenshot paths relative
+        if: always()
+        run: |
+          [ -d cypress/reports/mocha ] && find cypress/reports/mocha -name "*.json" -exec sed -i "s|$(pwd)/||g" {} \; || true
+
+      - name: Upload mocha results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mocha-results-ci
+          path: cypress/reports/mocha/
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screenshots-ci
+          path: cypress/screenshots/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  deploy-report:
+    name: Deploy Report → /ci/
+    runs-on: ubuntu-latest
+    needs: cypress-tests
+    if: always()
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download mocha results
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: mocha-results-ci
+          path: cypress/reports/mocha/
+
+      - name: Download screenshots
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: screenshots-ci
+          path: cypress/screenshots/
+
+      - name: Generate HTML report
+        run: |
+          if ls cypress/reports/mocha/*.json 2>/dev/null | grep -q .; then
+            npx mochawesome-merge "cypress/reports/mocha/*.json" -o cypress/reports/mochawesome.json
+            HAS_RESULTS=$(node -e "try { const r=require('./cypress/reports/mochawesome.json'); const ok=Array.isArray(r.results) && r.results.length > 0 && r.results[0] != null; console.log(ok ? 'yes' : 'no'); } catch(e) { console.log('no'); }")
+            if [ "$HAS_RESULTS" = "yes" ]; then
+              npx tsx scripts/process-report.ts
+              npx marge cypress/reports/mochawesome.json -f index -o cypress/reports/html --inline
+            else
+              echo "Merged report has no results, skipping HTML generation"
+              mkdir -p cypress/reports/html
+              echo "<html><body><h1>No test results available</h1></body></html>" > cypress/reports/html/index.html
+            fi
+          else
+            echo "No test reports found, skipping report generation"
+            mkdir -p cypress/reports/html
+            echo "<html><body><h1>No test results available</h1></body></html>" > cypress/reports/html/index.html
+          fi
+
+      - name: Inject run metadata
+        env:
+          META_WORKFLOW: ${{ github.workflow }}
+          META_ENV: qa
+          META_BRANCH: ${{ github.head_ref }}
+          META_ACTOR: ${{ github.actor }}
+          META_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: npx tsx scripts/inject-metadata.ts
+
+      - name: Deploy to GitHub Pages (/ci/)
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: cypress/reports/html
+          target-folder: ci
+          clean: true
