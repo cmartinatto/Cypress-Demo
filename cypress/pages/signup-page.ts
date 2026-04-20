@@ -82,11 +82,6 @@ class SignupPage {
     return cy.get('[data-qa="create-account"]');
   }
 
-  get accountCreatedTitle() {
-    cy.log("Signup > Account Created title");
-    return cy.get('[data-qa="account-created"]');
-  }
-
   get accountDeletedTitle() {
     cy.log("Signup > Account Deleted title");
     return cy.get('[data-qa="account-deleted"]');

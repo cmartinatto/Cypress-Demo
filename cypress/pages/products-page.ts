@@ -21,11 +21,6 @@ class ProductsPage {
     return cy.get("#submit_search");
   }
 
-  get addToCartButtons() {
-    cy.log("Products > Add to cart buttons");
-    return cy.get(".productinfo a.add-to-cart");
-  }
-
   addToCartButton(index: number) {
     cy.log(`Products > Add to cart button [${index}]`);
     return cy.get(".productinfo a.add-to-cart").eq(index);
@@ -39,11 +34,6 @@ class ProductsPage {
   get viewCartButton() {
     cy.log("Products > View Cart button (modal)");
     return cy.get('#cartModal a[href="/view_cart"]');
-  }
-
-  get productNames() {
-    cy.log("Products > Product names");
-    return cy.get(".productinfo p");
   }
 }
 
