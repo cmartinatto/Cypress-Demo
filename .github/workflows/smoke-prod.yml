@@ -1,0 +1,142 @@
+name: Smoke — Prod (Scheduled)
+
+on:
+  schedule:
+    - cron: "0 1 * * *"   # 01:00 UTC daily
+  workflow_dispatch:       # manual fallback
+
+permissions:
+  contents: write
+  issues: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  cypress-tests:
+    name: Smoke — Prod
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Cypress smoke tests
+        uses: cypress-io/github-action@v6
+        with:
+          command: npm test -- --suite smoke --env prod
+        env:
+          CYPRESS_VALID_USER_EMAIL: ${{ secrets.VALID_USER_EMAIL }}
+          CYPRESS_VALID_USER_PASSWORD: ${{ secrets.VALID_USER_PASSWORD }}
+          CYPRESS_VALID_USER_NAME: ${{ secrets.VALID_USER_NAME }}
+
+      - name: Make screenshot paths relative
+        if: always()
+        run: |
+          [ -d cypress/reports/mocha ] && find cypress/reports/mocha -name "*.json" -exec sed -i "s|$(pwd)/||g" {} \; || true
+
+      - name: Upload mocha results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mocha-results-smoke-prod
+          path: cypress/reports/mocha/
+          retention-days: 7
+
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screenshots-smoke-prod
+          path: cypress/screenshots/
+          retention-days: 7
+
+  deploy-report:
+    name: Deploy Report → /smoke-prod/
+    runs-on: ubuntu-latest
+    needs: cypress-tests
+    if: always()
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download mocha results
+        uses: actions/download-artifact@v4
+        with:
+          name: mocha-results-smoke-prod
+          path: cypress/reports/mocha/
+
+      - name: Download screenshots
+        uses: actions/download-artifact@v4
+        with:
+          name: screenshots-smoke-prod
+          path: cypress/screenshots/
+
+      - name: Generate HTML report
+        run: |
+          npx mochawesome-merge "cypress/reports/mocha/*.json" -o cypress/reports/mochawesome.json
+          npx tsx scripts/process-report.ts
+          npx marge cypress/reports/mochawesome.json -f index -o cypress/reports/html --inline
+
+      - name: Inject run metadata
+        env:
+          META_WORKFLOW: ${{ github.workflow }}
+          META_ENV: prod
+          META_BRANCH: ${{ github.ref_name }}
+          META_ACTOR: ${{ github.actor }}
+          META_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: npx tsx scripts/inject-metadata.ts
+
+      - name: Deploy to GitHub Pages (/smoke-prod/)
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: cypress/reports/html
+          target-folder: smoke-prod
+          clean: true
+
+  notify-on-failure:
+    name: Notify — Open Issue on Failure
+    runs-on: ubuntu-latest
+    needs: cypress-tests
+    if: failure()
+    timeout-minutes: 30
+
+    steps:
+      - name: Open GitHub Issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const date = new Date().toISOString().slice(0, 10);
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const reportUrl = `https://${context.repo.owner}.github.io/${context.repo.repo}/smoke-prod/`;
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `\uD83D\uDD34 Smoke Prod failed — ${date}`,
+              body: [
+                '## Scheduled smoke test failed against **Production**',
+                '',
+                `| Field | Value |`,
+                `|---|---|`,
+                `| Date | ${date} |`,
+                `| Triggered by | ${context.eventName} |`,
+                `| Run | [View run](${runUrl}) |`,
+                `| Report | [View report](${reportUrl}) |`,
+                '',
+                '_This issue was opened automatically by the CI workflow._',
+              ].join('\n'),
+            });

@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+
+# Cypress artifacts
+cypress/screenshots/
+cypress/videos/
+cypress/downloads/
+cypress/reports/
+
+# Local environment config (contains env-specific settings, not for sharing)
+cypress/local.config.json
+
+# Cypress environment variables (credentials and secrets)
+cypress.env.json
+
+# TypeScript compiled output
+dist/
+*.js.map
+
+# Environment variables & secrets
+.env
+.env.*
+*.key
+*.pem
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.user
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test run artifacts
+test-results/
+junit-results/
