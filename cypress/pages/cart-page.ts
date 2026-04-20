@@ -16,16 +16,6 @@ class CartPage {
     return cy.get("#cart_info_table tbody tr");
   }
 
-  get cartProductNames() {
-    cy.log("Cart > Product names");
-    return cy.get(".cart_description h4 a");
-  }
-
-  get removeButtons() {
-    cy.log("Cart > Remove buttons");
-    return cy.get("a.cart_quantity_delete");
-  }
-
   removeButton(index: number) {
     cy.log(`Cart > Remove button [${index}]`);
     return cy.get("a.cart_quantity_delete").eq(index);

@@ -21,10 +21,6 @@ class CheckoutPage {
     return cy.get("a.btn.check_out");
   }
 
-  get deliveryAddress() {
-    cy.log("Checkout > Delivery address");
-    return cy.get("#address_delivery");
-  }
 }
 
 export const checkoutPage = new CheckoutPage();

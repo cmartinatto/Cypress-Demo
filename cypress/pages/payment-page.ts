@@ -41,10 +41,6 @@ class PaymentPage {
     return cy.get('[data-qa="pay-button"]');
   }
 
-  get orderPlacedTitle() {
-    cy.log("Payment > Order Placed title");
-    return cy.get('[data-qa="order-placed"]');
-  }
 }
 
 export const paymentPage = new PaymentPage();
