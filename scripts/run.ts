@@ -311,7 +311,7 @@ if (suiteName) {
     if (typeof entry === "string") {
       plainSpecs.push(entry);
     } else {
-      filteredSpecs.push({ file: entry.file, grep: entry.tests.join("|") });
+      filteredSpecs.push({ file: entry.file, grep: entry.tests.join(";") });
     }
   }
 
