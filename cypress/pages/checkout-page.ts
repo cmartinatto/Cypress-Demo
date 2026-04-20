@@ -20,7 +20,6 @@ class CheckoutPage {
     cy.log("Checkout > Place Order button");
     return cy.get("a.btn.check_out");
   }
-
 }
 
 export const checkoutPage = new CheckoutPage();

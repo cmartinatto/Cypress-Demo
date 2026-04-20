@@ -35,7 +35,6 @@ class ProductsPage {
     cy.log("Products > View Cart button (modal)");
     return cy.get('#cartModal a[href="/view_cart"]');
   }
-
 }
 
 export const productsPage = new ProductsPage();

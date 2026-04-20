@@ -40,7 +40,6 @@ class PaymentPage {
     cy.log("Payment > Pay button");
     return cy.get('[data-qa="pay-button"]');
   }
-
 }
 
 export const paymentPage = new PaymentPage();
