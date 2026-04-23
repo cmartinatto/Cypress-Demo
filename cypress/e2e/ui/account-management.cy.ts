@@ -6,6 +6,7 @@ import { createAccountViaAPI } from "../../support/api/users";
 import { generateUserData } from "../../utils/factories/user-data-factory";
 import { UserData } from "../../interfaces/user-data";
 import { homePageActionManager } from "../../manager/action/home-page-action-manager";
+import { headerMenu } from "../../pages/header-menu";
 
 describe("Account Management", () => {
   describe("With existing account", () => {
@@ -63,7 +64,7 @@ describe("Account Management", () => {
       headerActionManager.logout();
 
       // Verify the user is logged out
-      headerAssertionManager.verifyLoggedOut();
+      headerMenu.signupLoginButton.should("be.visible");
     });
 
     it("should delete account", { tags: ["TC-UI-004"] }, () => {

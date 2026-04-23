@@ -16,10 +16,6 @@ class HeaderAssertionManager {
     headerMenu.loggedInAsText.should("be.visible").and("contain", username);
   }
 
-  /** Asserts that the Signup/Login button is visible, confirming the user is not authenticated. */
-  verifyLoggedOut() {
-    headerMenu.signupLoginButton.should("be.visible");
-  }
 }
 
 export const headerAssertionManager = new HeaderAssertionManager();
