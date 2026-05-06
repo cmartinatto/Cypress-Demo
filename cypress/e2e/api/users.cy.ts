@@ -1,6 +1,7 @@
 import { generateUserData } from "../../utils/factories/user-data-factory";
 import { createAccountViaAPI } from "../../support/api/users";
 import { UserData } from "../../interfaces/user-data";
+import { parseBody } from "../../utils/api";
 
 describe("API - Users", () => {
   context("POST /api/createAccount", () => {
@@ -30,8 +31,7 @@ describe("API - Users", () => {
           mobile_number: user.mobile,
         },
       }).then((response) => {
-        const responseBody =
-          typeof response.body === "string" ? JSON.parse(response.body) : response.body;
+        const responseBody = parseBody(response);
         expect(response.status).to.eq(200);
         expect(responseBody.responseCode).to.eq(200);
         expect(responseBody.message).to.eq("User created!");
@@ -66,8 +66,7 @@ describe("API - Users", () => {
           mobile_number: user.mobile,
         },
       }).then((response) => {
-        const responseBody =
-          typeof response.body === "string" ? JSON.parse(response.body) : response.body;
+        const responseBody = parseBody(response);
         expect(response.status).to.eq(400);
         expect(responseBody.responseCode).to.eq(400);
         expect(responseBody.message).to.eq("Email already exists!");
@@ -106,8 +105,7 @@ describe("API - Users", () => {
         url: "/api/getUserDetailByEmail",
         qs: { email: user.email },
       }).then((response) => {
-        const responseBody =
-          typeof response.body === "string" ? JSON.parse(response.body) : response.body;
+        const responseBody = parseBody(response);
         expect(response.status).to.eq(200);
         expect(responseBody.responseCode).to.eq(200);
         expect(responseBody.user).to.exist;
@@ -121,8 +119,7 @@ describe("API - Users", () => {
         url: "/api/getUserDetailByEmail",
         qs: { email: `nonexistent_${Date.now()}@nowhere.test` },
       }).then((response) => {
-        const responseBody =
-          typeof response.body === "string" ? JSON.parse(response.body) : response.body;
+        const responseBody = parseBody(response);
         expect(response.status).to.eq(404);
         expect(responseBody.responseCode).to.eq(404);
         expect(responseBody.message).to.eq("Account not found with this email, try another email!");
@@ -152,8 +149,7 @@ describe("API - Users", () => {
         url: "/api/getUserDetailByEmail",
         qs: { email: user.email },
       }).then((response) => {
-        const responseBody =
-          typeof response.body === "string" ? JSON.parse(response.body) : response.body;
+        const responseBody = parseBody(response);
         const returnedUser = responseBody.user;
         expect(returnedUser).to.have.property("id");
         expect(returnedUser).to.have.property("name");
