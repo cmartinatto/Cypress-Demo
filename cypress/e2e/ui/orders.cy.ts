@@ -1,6 +1,5 @@
 import { productsActionManager } from "../../manager/action/products-action-manager";
 import { cartActionManager } from "../../manager/action/cart-action-manager";
-import { loginActionManager } from "../../manager/action/login-action-manager";
 import { paymentActionManager } from "../../manager/action/payment-action-manager";
 import { cartPage } from "../../pages/cart-page";
 import { checkoutPage } from "../../pages/checkout-page";
@@ -12,23 +11,15 @@ import { UserData } from "../../interfaces/user-data";
 import { cartAssertionManager } from "../../manager/assertion/cart-assertion-manager";
 import { paymentAssertionManager } from "../../manager/assertion/payment-assertion-manager";
 import { homePageActionManager } from "../../manager/action/home-page-action-manager";
+import { authHelper } from "../../manager/helpers/auth-helper";
 
 describe("Orders", () => {
   describe("With Existing User", () => {
-    let email: string;
-    let password: string;
-
-    before(() => {
-      cy.env(["VALID_USER_EMAIL", "VALID_USER_PASSWORD"]).then((envs) => {
-        email = envs.VALID_USER_EMAIL;
-        password = envs.VALID_USER_PASSWORD;
-      });
-    });
-
     beforeEach(() => {
+      cy.env(["VALID_USER_EMAIL", "VALID_USER_PASSWORD"]).then((envs) => {
+        authHelper.loginWithSession(envs.VALID_USER_EMAIL, envs.VALID_USER_PASSWORD);
+      });
       homePageActionManager.navigate();
-      headerActionManager.clickSignupLogin();
-      loginActionManager.login(email, password);
     });
 
     it(
@@ -62,9 +53,8 @@ describe("Orders", () => {
     });
 
     beforeEach(() => {
+      authHelper.loginWithSession(newUser.email, newUser.password);
       homePageActionManager.navigate();
-      headerActionManager.clickSignupLogin();
-      loginActionManager.login(newUser.email, newUser.password);
     });
 
     it("should complete checkout with a new user", { tags: ["TC-UI-006", "@smoke"] }, () => {

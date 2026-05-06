@@ -10,15 +10,17 @@ A Cypress test automation framework built as a portfolio project, covering UI an
 
 ## Architecture
 
-The framework is organized around three layers:
+The framework is organized around the following layers:
 
 ```
-Test (e2e)  →  Action Manager  →  Page Object  →  Selector
+Test (e2e)  →  Helper / Action Manager / Assertion Manager  →  Page Object  →  Selector
 ```
 
 - **Page Objects** (`cypress/pages/`) expose element selectors as typed getters.
-- **Action Managers** (`cypress/manager/action/`) compose page interactions into reusable business-level steps (e.g., `loginActionManager.login(email, password)`).
-- **Tests** (`cypress/e2e/`) orchestrate action managers and assert outcomes — no selectors or raw Cypress commands leak into test files.
+- **Action Managers** (`cypress/manager/action/`) compose page interactions into reusable business-level steps scoped to a single page (e.g., `loginActionManager.login(email, password)`).
+- **Assertion Managers** (`cypress/manager/assertion/`) encapsulate `should` assertions on page state, keeping verification logic out of test files.
+- **Helpers** (`cypress/manager/helpers/`) orchestrate cross-page flows that span multiple action managers and don't belong to any single page (e.g., `authHelper.loginWithSession`).
+- **Tests** (`cypress/e2e/`) orchestrate the above — no selectors or raw Cypress commands leak into test files.
 
 This separation means selector changes touch only one file, and multi-step flows are reusable across tests.
 
@@ -48,13 +50,11 @@ export const loginPage = new LoginPage();
 
 ### Action Manager
 
-Action managers sit above page objects and encapsulate multi-step user flows. All extend a `BaseActionManager` with shared utilities.
+Action managers sit above page objects and encapsulate multi-step user flows scoped to a single page. All extend a `BaseActionManager` with shared utilities.
 
 ```ts
 // cypress/manager/action/login-action-manager.ts
 class LoginActionManager extends BaseActionManager {
-  navigate() { ... }
-
   login(email: string, password: string) {
     loginPage.emailField.type(email);
     loginPage.passwordField.type(password, { sensitive: true }); // masked in logs
@@ -63,6 +63,41 @@ class LoginActionManager extends BaseActionManager {
 }
 export const loginActionManager = new LoginActionManager();
 ```
+
+### Assertion Manager
+
+Assertion managers mirror action managers but own the verification side. They encapsulate `should` calls against page elements so assertion logic stays out of test files and is reusable across specs.
+
+```ts
+// cypress/manager/assertion/header-assertion-manager.ts
+class HeaderAssertionManager {
+  verifyLoggedIn(name: string) {
+    headerMenu.loggedInAsLabel(name).should("be.visible");
+  }
+  verifyLoggedOut() {
+    headerMenu.signupLoginLink.should("be.visible");
+  }
+}
+export const headerAssertionManager = new HeaderAssertionManager();
+```
+
+### Auth Helper
+
+Flows that span multiple pages (e.g. navigating to home, opening the login modal, then submitting credentials) don't belong in any single action manager. The auth helper composes the required action managers into a single reusable entry point.
+
+```ts
+// cypress/manager/helpers/auth-helper.ts
+function loginWithSession(email: string, password: string) {
+  cy.session(email, () => {
+    homePageActionManager.navigate();
+    headerActionManager.clickSignupLogin();
+    loginActionManager.login(email, password);
+  });
+}
+export const authHelper = { loginWithSession };
+```
+
+`cy.session` caches the authenticated browser state per email, so the full login flow only runs once per user across the entire test suite.
 
 ### Factory Pattern
 
@@ -122,25 +157,29 @@ interceptor.wait().its("response.statusCode").should("eq", 200);
 ```
 cypress/
 ├── e2e/
-│   ├── api/          # API test specs
-│   └── ui/           # UI test specs
-├── pages/            # Page Object classes
+│   ├── api/              # API test specs
+│   └── ui/               # UI test specs
+├── pages/                # Page Object classes (selectors only)
 ├── manager/
-│   └── action/       # Action Manager classes
+│   ├── action/           # Action Manager classes (per-page flows)
+│   ├── assertion/        # Assertion Manager classes (per-page verifications)
+│   └── helpers/          # Cross-page helpers (e.g. authHelper)
+├── interception/         # Named Interceptor instances
 ├── utils/
-│   └── factories/    # Test data factories (Faker.js)
+│   └── factories/        # Test data factories (Faker.js)
 ├── support/
-│   ├── api/          # API setup helpers
-│   ├── commands.ts   # Custom Cypress commands
-│   ├── interceptor.ts# Network interception abstraction
-│   └── e2e.ts        # Global hooks and plugin registration
-├── config/           # Per-environment config (dev / qa / prod)
-├── suites/           # Named suite definitions
-└── interfaces/       # TypeScript interfaces for test data
+│   ├── api/              # API setup helpers
+│   ├── commands.ts       # Custom Cypress commands
+│   ├── interceptor.ts    # Network interception abstraction (Interceptor class)
+│   ├── index.d.ts        # Custom type declarations for Cypress
+│   └── e2e.ts            # Global hooks and plugin registration
+├── config/               # Per-environment config (dev / qa / prod)
+├── suites/               # Named suite definitions
+└── interfaces/           # TypeScript interfaces for test data
 scripts/
-├── run.ts            # Custom test runner (filtering, suites, reporting)
-├── process-report.ts # Report metadata injection
-└── clean-reports.ts  # Report cleanup
+├── run.ts                # Custom test runner (filtering, suites, reporting)
+├── process-report.ts     # Report metadata injection
+└── clean-reports.ts      # Report cleanup
 ```
 
 ---
