@@ -15,7 +15,6 @@ class HeaderAssertionManager {
     headerMenu.logoutButton.should("be.visible");
     headerMenu.loggedInAsText.should("be.visible").and("contain", username);
   }
-
 }
 
 export const headerAssertionManager = new HeaderAssertionManager();
