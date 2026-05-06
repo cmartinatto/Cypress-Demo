@@ -1,3 +1,5 @@
+import { parseBody } from "../../utils/api";
+
 describe("API - Products", () => {
   context("GET /api/productsList", () => {
     it(
@@ -8,8 +10,7 @@ describe("API - Products", () => {
           method: "GET",
           url: "/api/productsList",
         }).then((response) => {
-          const responseBody =
-            typeof response.body === "string" ? JSON.parse(response.body) : response.body;
+          const responseBody = parseBody(response);
           expect(response.status).to.eq(200);
           expect(responseBody.responseCode).to.eq(200);
           expect(responseBody.products).to.be.an("array").and.not.be.empty;
@@ -26,8 +27,7 @@ describe("API - Products", () => {
           url: "/api/productsList",
           failOnStatusCode: false,
         }).then((response) => {
-          const responseBody =
-            typeof response.body === "string" ? JSON.parse(response.body) : response.body;
+          const responseBody = parseBody(response);
           expect(response.status).to.eq(200);
           expect(responseBody.responseCode).to.eq(405);
           expect(responseBody.message).to.eq("This request method is not supported.");
@@ -75,8 +75,7 @@ describe("API - Products", () => {
           url: "/api/brandsList",
           failOnStatusCode: false,
         }).then((response) => {
-          const responseBody =
-            typeof response.body === "string" ? JSON.parse(response.body) : response.body;
+          const responseBody = parseBody(response);
           expect(response.status).to.eq(200);
           expect(responseBody.responseCode).to.eq(405);
           expect(responseBody.message).to.eq("This request method is not supported.");
@@ -109,8 +108,7 @@ describe("API - Products", () => {
           form: true,
           body: { search_product: "top" },
         }).then((response) => {
-          const responseBody =
-            typeof response.body === "string" ? JSON.parse(response.body) : response.body;
+          const responseBody = parseBody(response);
           expect(response.status).to.eq(200);
           expect(responseBody.responseCode).to.eq(200);
           expect(responseBody.products).to.be.an("array").and.not.be.empty;
@@ -128,8 +126,7 @@ describe("API - Products", () => {
           form: true,
           body: {},
         }).then((response) => {
-          const responseBody =
-            typeof response.body === "string" ? JSON.parse(response.body) : response.body;
+          const responseBody = parseBody(response);
           expect(response.status).to.eq(200);
           expect(responseBody.responseCode).to.eq(400);
           expect(responseBody.message).to.include("Bad request");
@@ -146,8 +143,7 @@ describe("API - Products", () => {
           url: "/api/searchProduct",
           failOnStatusCode: false,
         }).then((response) => {
-          const responseBody =
-            typeof response.body === "string" ? JSON.parse(response.body) : response.body;
+          const responseBody = parseBody(response);
           expect(response.status).to.eq(200);
           expect(responseBody.responseCode).to.eq(405);
           expect(responseBody.message).to.eq("This request method is not supported.");
@@ -165,8 +161,7 @@ describe("API - Products", () => {
           form: true,
           body: { search_product: "xyznotaproduct12345" },
         }).then((response) => {
-          const responseBody =
-            typeof response.body === "string" ? JSON.parse(response.body) : response.body;
+          const responseBody = parseBody(response);
           expect(response.status).to.eq(200);
           expect(responseBody.responseCode).to.eq(200);
           expect(responseBody.products).to.be.an("array").and.have.length(0);
@@ -184,8 +179,7 @@ describe("API - Products", () => {
           form: true,
           body: { search_product: "dress" },
         }).then((response) => {
-          const responseBody =
-            typeof response.body === "string" ? JSON.parse(response.body) : response.body;
+          const responseBody = parseBody(response);
           expect(responseBody).to.have.property("responseCode");
           expect(responseBody).to.have.property("products");
         });

@@ -2,6 +2,7 @@ import { faker } from "@faker-js/faker";
 import { generateUserData } from "../../utils/factories/user-data-factory";
 import { createAccountViaAPI } from "../../support/api/users";
 import { UserData } from "../../interfaces/user-data";
+import { parseBody } from "../../utils/api";
 
 describe("API - Login (POST /api/verifyLogin)", () => {
   let user: UserData;
@@ -37,8 +38,7 @@ describe("API - Login (POST /api/verifyLogin)", () => {
             password: user.password,
           },
         }).then((response) => {
-          const responseBody =
-            typeof response.body === "string" ? JSON.parse(response.body) : response.body;
+          const responseBody = parseBody(response);
           expect(response.status).to.eq(200);
           expect(responseBody.responseCode).to.eq(200);
           expect(responseBody.message).to.eq("User exists!");
@@ -58,8 +58,7 @@ describe("API - Login (POST /api/verifyLogin)", () => {
           password: wrongPassword,
         },
       }).then((response) => {
-        const responseBody =
-          typeof response.body === "string" ? JSON.parse(response.body) : response.body;
+        const responseBody = parseBody(response);
         expect(response.status).to.eq(200);
         expect(responseBody.responseCode).to.eq(404);
         expect(responseBody.message).to.eq("User not found!");
@@ -76,8 +75,7 @@ describe("API - Login (POST /api/verifyLogin)", () => {
           password: user.password,
         },
       }).then((response) => {
-        const responseBody =
-          typeof response.body === "string" ? JSON.parse(response.body) : response.body;
+        const responseBody = parseBody(response);
         expect(response.status).to.eq(200);
         expect(responseBody.responseCode).to.eq(404);
         expect(responseBody.message).to.eq("User not found!");
@@ -117,8 +115,7 @@ describe("API - Login (POST /api/verifyLogin)", () => {
           password: user.password,
         },
       }).then((response) => {
-        const responseBody =
-          typeof response.body === "string" ? JSON.parse(response.body) : response.body;
+        const responseBody = parseBody(response);
         expect(response.status).to.eq(200);
         expect(responseBody.responseCode).to.eq(400);
         expect(responseBody.message).to.include("Bad request");
@@ -134,8 +131,7 @@ describe("API - Login (POST /api/verifyLogin)", () => {
           email: user.email,
         },
       }).then((response) => {
-        const responseBody =
-          typeof response.body === "string" ? JSON.parse(response.body) : response.body;
+        const responseBody = parseBody(response);
         expect(response.status).to.eq(200);
         expect(responseBody.responseCode).to.eq(400);
         expect(responseBody.message).to.include("Bad request");
@@ -149,8 +145,7 @@ describe("API - Login (POST /api/verifyLogin)", () => {
         form: true,
         body: {},
       }).then((response) => {
-        const responseBody =
-          typeof response.body === "string" ? JSON.parse(response.body) : response.body;
+        const responseBody = parseBody(response);
         expect(response.status).to.eq(200);
         expect(responseBody.responseCode).to.eq(400);
         expect(responseBody.message).to.include("Bad request");
