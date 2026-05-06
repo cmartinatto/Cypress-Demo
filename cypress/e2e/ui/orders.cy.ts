@@ -24,7 +24,7 @@ describe("Orders", () => {
 
     it(
       "should complete checkout with existing credentials",
-      { tags: ["TC-UI-005", "@smoke", "@debugging"] },
+      { tags: ["TC-UI-005", "@smoke"] },
       () => {
         // Preconditions
         const paymentData = generatePaymentData();
@@ -79,7 +79,7 @@ describe("Orders", () => {
     beforeEach(() => {
       homePageActionManager.navigate();
     });
-    it("should add a product to the cart", { tags: ["TC-UI-007", "@smoke", "@debugging"] }, () => {
+    it("should add a product to the cart", { tags: ["TC-UI-007", "@smoke"] }, () => {
       // Test
       productsActionManager.addProductToCart(0);
       productsActionManager.goToCart();

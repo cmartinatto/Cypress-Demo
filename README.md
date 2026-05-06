@@ -245,7 +245,7 @@ Tests carry two kinds of tags:
 
 | Format | Purpose | Examples |
 |---|---|---|
-| `@<name>` | Category — marks the type or scope of a test | `@smoke`, `@regression`, `@debugging` |
+| `@<name>` | Category — marks the type or scope of a test | `@smoke`, `@regression` |
 | `TC-<area>-<number>` | Test case ID — traces back to the test plan | `TC-UI-001`, `TC-API-002` |
 
 ```ts
