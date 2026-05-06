@@ -27,10 +27,8 @@ export default defineConfig({
     setupNodeEvents(_on, config) {
       const envName = (config.env.ENV as string) ?? "dev";
       const envConfig = loadEnvConfig(envName);
-
       config.baseUrl = envConfig.baseUrl;
       config.env["API_URL"] = envConfig.apiUrl;
-
       grepPlugin.plugin(config);
       return config;
     },
