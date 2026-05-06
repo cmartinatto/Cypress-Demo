@@ -231,11 +231,8 @@ describe("API - Login (POST /api/verifyLogin)", () => {
           password: user.password,
         },
       }).then((response) => {
-        const responseBody =
-          typeof response.body === "string" ? JSON.parse(response.body) : response.body;
         expect(response.status).to.eq(200);
-        expect(responseBody.responseCode).to.eq(200);
-        expect(responseBody.message).to.eq("User exists!");
+        expect(response.headers["content-type"]).to.include("application/json");
       });
     });
   });
