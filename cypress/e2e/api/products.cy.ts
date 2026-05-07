@@ -2,21 +2,17 @@ import { parseBody } from "../../utils/api";
 
 describe("API - Products", () => {
   context("GET /api/productsList", () => {
-    it(
-      "should return 200 and a list of products",
-      { tags: ["TC-API-025", "@smoke"] },
-      () => {
-        cy.request({
-          method: "GET",
-          url: "/api/productsList",
-        }).then((response) => {
-          const responseBody = parseBody(response);
-          expect(response.status).to.eq(200);
-          expect(responseBody.responseCode).to.eq(200);
-          expect(responseBody.products).to.be.an("array").and.not.be.empty;
-        });
-      },
-    );
+    it("should return 200 and a list of products", { tags: ["TC-API-025", "@smoke"] }, () => {
+      cy.request({
+        method: "GET",
+        url: "/api/productsList",
+      }).then((response) => {
+        const responseBody = parseBody(response);
+        expect(response.status).to.eq(200);
+        expect(responseBody.responseCode).to.eq(200);
+        expect(responseBody.products).to.be.an("array").and.not.be.empty;
+      });
+    });
 
     it(
       "should return responseCode 405 when using POST instead of GET",

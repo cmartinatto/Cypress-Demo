@@ -47,7 +47,9 @@ export class Interceptor {
         }
         const { statusCode } = interception.response;
         if (statusCode < 200 || statusCode >= 300) {
-          throw new Error(`Expected 2xx but got ${statusCode}: ${JSON.stringify(interception.response.body)}`);
+          throw new Error(
+            `Expected 2xx but got ${statusCode}: ${JSON.stringify(interception.response.body)}`,
+          );
         }
         return cy.wrap(interception);
       });
