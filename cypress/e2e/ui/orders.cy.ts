@@ -22,9 +22,12 @@ describe("Orders", () => {
       homePageActionManager.navigate();
     });
 
+    // retries: this test exercises the full checkout flow against an external site.
+    // Network latency or transient server delays can cause intermittent failures.
+    // retries: 1 demonstrates per-test retry config — it is NOT a substitute for fixing flakiness.
     it(
       "should complete checkout with existing credentials",
-      { tags: ["TC-UI-005", "@smoke"] },
+      { tags: ["TC-UI-005", "@smoke"], retries: { runMode: 1, openMode: 0 } },
       () => {
         // Preconditions
         const paymentData = generatePaymentData();
