@@ -20,6 +20,7 @@ function loadEnvConfig(envName: string): EnvConfig {
 export default defineConfig({
   viewportWidth: 1280,
   viewportHeight: 720,
+  video: false,
   allowCypressEnv: false,
   reporter: "cypress-multi-reporters",
   reporterOptions: {
