@@ -42,11 +42,16 @@ export class Interceptor {
         responseTimeout: this.responseTimeout,
       })
       .then((interception) => {
-        if (interception.response!.statusCode !== 200) {
-          throw new Error(JSON.stringify(interception.response!.body));
-        } else {
-          return cy.wrap(interception);
+        if (!interception.response) {
+          throw new Error(`No response received for interceptor: ${this.tag}`);
         }
+        const { statusCode } = interception.response;
+        if (statusCode < 200 || statusCode >= 300) {
+          throw new Error(
+            `Expected 2xx but got ${statusCode}: ${JSON.stringify(interception.response.body)}`,
+          );
+        }
+        return cy.wrap(interception);
       });
   }
 }
