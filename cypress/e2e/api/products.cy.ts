@@ -4,7 +4,7 @@ describe("API - Products", () => {
   context("GET /api/productsList", () => {
     it(
       "should return 200 and a list of products",
-      { tags: ["TC-API-025", "@smoke", "@debugging"] },
+      { tags: ["TC-API-025", "@smoke"] },
       () => {
         cy.request({
           method: "GET",
