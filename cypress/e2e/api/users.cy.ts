@@ -95,6 +95,7 @@ describe("API - Users", () => {
     let user: UserData;
 
     before(() => {
+      cy.visit("/");
       user = generateUserData();
       createAccountViaAPI(user);
     });
@@ -162,6 +163,7 @@ describe("API - Users", () => {
     let user: UserData;
 
     before(() => {
+      cy.visit("/");
       user = generateUserData();
       createAccountViaAPI(user);
     });

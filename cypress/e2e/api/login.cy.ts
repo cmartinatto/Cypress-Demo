@@ -12,6 +12,7 @@ describe("API - Login (POST /api/verifyLogin)", () => {
   let invalidPassword: string;
 
   before(() => {
+    cy.visit("/");
     user = generateUserData();
     createAccountViaAPI(user);
     wrongPassword = `${faker.internet.password({ length: 8, memorable: true })}X9!`;
