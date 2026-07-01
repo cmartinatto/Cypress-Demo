@@ -40,6 +40,7 @@ describe("API - Users", () => {
 
     it("should return responseCode 400 when email already exists", { tags: ["TC-API-013"] }, () => {
       const user: UserData = generateUserData();
+      cy.visit("/");
       createAccountViaAPI(user);
 
       cy.request({
@@ -251,6 +252,7 @@ describe("API - Users", () => {
       { tags: ["TC-API-022", "@smoke"] },
       () => {
         const user: UserData = generateUserData();
+        cy.visit("/");
         createAccountViaAPI(user);
 
         cy.request({
