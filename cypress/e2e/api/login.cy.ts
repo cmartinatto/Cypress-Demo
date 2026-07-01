@@ -216,7 +216,7 @@ describe("API - Login (POST /api/verifyLogin)", () => {
       },
     );
 
-    it("should return Content-Type JSON", { tags: ["TC-API-011"] }, () => {
+    it("(Should fail) should return Content-Type JSON", { tags: ["TC-API-011"] }, () => {
       cy.request({
         method: "POST",
         url: "/api/verifyLogin",

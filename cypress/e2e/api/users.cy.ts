@@ -32,8 +32,8 @@ describe("API - Users", () => {
         },
       }).then((response) => {
         const responseBody = parseBody(response);
-        expect(response.status).to.eq(200);
-        expect(responseBody.responseCode).to.eq(200);
+        expect(response.status).to.eq(201);
+        expect(responseBody.responseCode).to.eq(201);
         expect(responseBody.message).to.eq("User created!");
       });
     });

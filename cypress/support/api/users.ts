@@ -10,6 +10,10 @@ export const createAccountViaAPI = (userData: UserData) => {
     method: "POST",
     url: "/api/createAccount",
     form: true,
+    // Prevent Cypress from following server-side redirects (e.g. bot-protection on CI
+    // environments). Without this the request can exhaust maxRedirects and throw a
+    // network-level error instead of a clear HTTP status failure.
+    followRedirect: false,
     body: {
       name: userData.name,
       email: userData.email,
@@ -29,5 +33,5 @@ export const createAccountViaAPI = (userData: UserData) => {
       city: userData.city,
       mobile_number: userData.mobile,
     },
-  });
+  }).its("status").should("eq", 201);
 };
