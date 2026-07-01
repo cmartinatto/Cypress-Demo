@@ -52,6 +52,7 @@ describe("Orders", () => {
 
     before(() => {
       newUser = generateUserData();
+      homePageActionManager.navigate();
       createAccountViaAPI(newUser);
     });
 

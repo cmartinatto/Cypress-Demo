@@ -32,14 +32,15 @@ describe("API - Users", () => {
         },
       }).then((response) => {
         const responseBody = parseBody(response);
-        expect(response.status).to.eq(200);
-        expect(responseBody.responseCode).to.eq(200);
+        expect(response.status).to.eq(201);
+        expect(responseBody.responseCode).to.eq(201);
         expect(responseBody.message).to.eq("User created!");
       });
     });
 
     it("should return responseCode 400 when email already exists", { tags: ["TC-API-013"] }, () => {
       const user: UserData = generateUserData();
+      cy.visit("/");
       createAccountViaAPI(user);
 
       cy.request({
@@ -95,6 +96,7 @@ describe("API - Users", () => {
     let user: UserData;
 
     before(() => {
+      cy.visit("/");
       user = generateUserData();
       createAccountViaAPI(user);
     });
@@ -162,6 +164,7 @@ describe("API - Users", () => {
     let user: UserData;
 
     before(() => {
+      cy.visit("/");
       user = generateUserData();
       createAccountViaAPI(user);
     });
@@ -249,6 +252,7 @@ describe("API - Users", () => {
       { tags: ["TC-API-022", "@smoke"] },
       () => {
         const user: UserData = generateUserData();
+        cy.visit("/");
         createAccountViaAPI(user);
 
         cy.request({

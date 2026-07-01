@@ -12,6 +12,7 @@ describe("API - Login (POST /api/verifyLogin)", () => {
   let invalidPassword: string;
 
   before(() => {
+    cy.visit("/");
     user = generateUserData();
     createAccountViaAPI(user);
     wrongPassword = `${faker.internet.password({ length: 8, memorable: true })}X9!`;
@@ -216,7 +217,7 @@ describe("API - Login (POST /api/verifyLogin)", () => {
       },
     );
 
-    it("should return Content-Type JSON", { tags: ["TC-API-011"] }, () => {
+    it("(Should fail) should return Content-Type JSON", { tags: ["TC-API-011"] }, () => {
       cy.request({
         method: "POST",
         url: "/api/verifyLogin",
