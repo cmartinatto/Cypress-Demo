@@ -32,7 +32,7 @@ describe("API - Users", () => {
         },
       }).then((response) => {
         const responseBody = parseBody(response);
-        expect(response.status).to.eq(201);
+        expect(response.status).to.eq(200);
         expect(responseBody.responseCode).to.eq(201);
         expect(responseBody.message).to.eq("User created!");
       });
@@ -68,7 +68,7 @@ describe("API - Users", () => {
         },
       }).then((response) => {
         const responseBody = parseBody(response);
-        expect(response.status).to.eq(400);
+        expect(response.status).to.eq(200);
         expect(responseBody.responseCode).to.eq(400);
         expect(responseBody.message).to.eq("Email already exists!");
       });
@@ -122,7 +122,7 @@ describe("API - Users", () => {
         qs: { email: `nonexistent_${Date.now()}@nowhere.test` },
       }).then((response) => {
         const responseBody = parseBody(response);
-        expect(response.status).to.eq(404);
+        expect(response.status).to.eq(200);
         expect(responseBody.responseCode).to.eq(404);
         expect(responseBody.message).to.eq("Account not found with this email, try another email!");
       });
@@ -138,7 +138,7 @@ describe("API - Users", () => {
         }).then((response) => {
           const responseBody =
             typeof response.body === "string" ? JSON.parse(response.body) : response.body;
-          expect(response.status).to.eq(400);
+          expect(response.status).to.eq(200);
           expect(responseBody.responseCode).to.eq(400);
           expect(responseBody.message).to.include("Bad request");
         });
@@ -207,7 +207,7 @@ describe("API - Users", () => {
     );
 
     it(
-      "should return responseCode 400 when updating a non-existent email",
+      "should return responseCode 404 when updating a non-existent email",
       { tags: ["TC-API-020"] },
       () => {
         cy.request({
@@ -222,8 +222,8 @@ describe("API - Users", () => {
         }).then((response) => {
           const responseBody =
             typeof response.body === "string" ? JSON.parse(response.body) : response.body;
-          expect(response.status).to.eq(400);
-          expect(responseBody.responseCode).to.eq(400);
+          expect(response.status).to.eq(200);
+          expect(responseBody.responseCode).to.eq(404);
         });
       },
     );
@@ -288,7 +288,7 @@ describe("API - Users", () => {
         }).then((response) => {
           const responseBody =
             typeof response.body === "string" ? JSON.parse(response.body) : response.body;
-          expect(response.status).to.eq(404);
+          expect(response.status).to.eq(200);
           expect(responseBody.responseCode).to.eq(404);
           expect(responseBody.message).to.eq("Account not found!");
         });

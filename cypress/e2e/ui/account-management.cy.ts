@@ -54,7 +54,7 @@ describe("Account Management", () => {
       headerAssertionManager.verifyLoggedIn(userData.name);
     });
 
-    it("should logout successfully", { tags: ["TC-UI-003"] }, () => {
+    it("(Should fail) should logout successfully", { tags: ["TC-UI-003"] }, () => {
       // Preconditions
       createAccountViaAPI(userData);
       headerActionManager.clickSignupLogin();
@@ -64,7 +64,7 @@ describe("Account Management", () => {
       headerActionManager.logout();
 
       // Verify the user is logged out
-      headerMenu.signupLoginButton.should("be.visible");
+      headerMenu.signupLoginButton.should("be.not.visible");
     });
 
     it("should delete account", { tags: ["TC-UI-004"] }, () => {
